@@ -108,7 +108,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(
                 Cors::permissive()
                     .allowed_origin_fn(|origin, _req_head| {
-                    origin.as_bytes().starts_with(b"http://127.0.0.1") || origin == "null"
+                    origin.as_bytes().starts_with(b"http://localhost") || origin == "null"
                 })
                     .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
                     .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
