@@ -99,6 +99,12 @@ async fn read_task(app_state: web::Data<AppState>, id: web::Path<u64>) -> impl R
     }
 }
 
+async fn read_all_task(app_state: web::Data<AppState>) -> impl Responder {
+    let mut db: std::sync::MutexGuard<Database> = app_state.db.lock().unwrap();
+    let tasks = db.get_all();
+    HttpResponse::Ok().json(tasks)
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let db: Database = match Database::load_from_file() {
@@ -128,6 +134,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(data.clone())
             .route("/task", web::post().to(create_task))
             .route("/task/{id}", web::get().to(read_task))
+            .route("/task", web::get().to(read_all_task))
     })
     .bind("127.0.0.1:8080")?
     .run()
