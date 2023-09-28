@@ -107,7 +107,7 @@ async fn read_all_task(app_state: web::Data<AppState>) -> impl Responder {
 
 async fn update_task(app_state: web::Data<AppState>, task: web::Json<Task>) -> impl Responder {
     let mut db: std::sync::MutexGuard<Database> = app_state.db.lock().unwrap();
-    db.insert(task.into_inner());
+    db.update(task.into_inner());
     let _ =  db.save_to_file();
     HttpResponse::Ok().finish()
 }
@@ -148,8 +148,8 @@ async fn main() -> std::io::Result<()> {
             .app_data(data.clone())
             .route("/task", web::post().to(create_task))
             .route("/task", web::get().to(read_all_task))
+            .route("/task/", web::put().to(update_task))
             .route("/task/{id}", web::get().to(read_task))
-            .route("/task/{id}", web::put().to(update_task))
             .route("/task/{id}", web::delete().to(delete_task))
     })
     .bind("127.0.0.1:8080")?
