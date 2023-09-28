@@ -105,6 +105,13 @@ async fn read_all_task(app_state: web::Data<AppState>) -> impl Responder {
     HttpResponse::Ok().json(tasks)
 }
 
+async fn update_task(app_state: web::Data<AppState>, task: web::Jeson<Task>) -> impl Responder {
+    let mut db: std::sync::MutexGuard<Database> = app_state.db.lock().unwrap();
+    db.insert(task.into_inner());
+    let _ =  db.save_to_file();
+    HttpResponse::Ok().finish()
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let db: Database = match Database::load_from_file() {
