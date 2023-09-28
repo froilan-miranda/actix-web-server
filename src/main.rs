@@ -46,7 +46,7 @@ impl Database {
         self.tasks.get(id) 
     }
     fn get_all(&self) -> Vec<&Task> {
-       self.tesks.values().collect() 
+       self.tasks.values().collect() 
     }
     fn delete(&mut self, id: &u64) {
         self.tasks.remove(id);
@@ -61,12 +61,12 @@ impl Database {
         self.users.insert(user.id, user); 
     }
     fn get_user_by_name(&self, username: &str) -> Option<&User> {
-        self.users.values().find(|u:&User| u.username == username)
+        self.users.values().find(|u| u.username == username)
     }
     
     // DATABASE SAVING
-    fn save_to_file(&self) -> std::io:Result<()> {
-        let data: Result<String, Error> = serde_json::to_string(&self)?;
+    fn save_to_file(&self) -> std::io::Result<()> {
+        let data = serde_json::to_string(&self)?;
         let mut file = fs::File::create("database.json")?;
         file.write_all(data.as_bytes())?;
         Ok(())
@@ -92,11 +92,11 @@ async fn create_task(app_state: web::Data<AppState>, task: web::Json<Task>) -> i
 }
 
 #[actix_web::main]
-async fn main() -> std::io:Result<()> {
+async fn main() -> std::io::Result<()> {
     let db: Database = match Database::load_from_file() {
         Ok(db) => db,
         Err(_) => Database::new(),
-    }
+    };
 
 
     let data = web::Data::new(AppState {
@@ -107,7 +107,7 @@ async fn main() -> std::io:Result<()> {
         App::new()
             .wrap(
                 Cors::permissive()
-                    .allowed_origin_fn(|origin: &HeaderValue, _req_head: &RequestHead| {{{
+                    .allowed_origin_fn(|origin, _req_head| {
                     origin.as_bytes().starts_with(b"http://127.0.0.1") || origin == "null"
                 })
                     .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
@@ -122,4 +122,5 @@ async fn main() -> std::io:Result<()> {
     })
     .bind("127.0.0.1:8080")?
     .run()
+    .await
 }
